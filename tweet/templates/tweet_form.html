@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <h2>
+    {% if form.instance.pk %}
+      Edit Tweet
+    {% else %}
+      Create Tweet
+    {% endif %}
+  </h2>
+
+  <form method="post" enctype="multipart/form-data" class="form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-warning" type="submit">Submit</button>
+  </form>
+
+</div>
+{% endblock %}
