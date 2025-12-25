@@ -5,6 +5,21 @@ from .forms import TweetForm, UserRegistrationForm
 from django.shortcuts import get_list_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from .forms import SignUpForm
+from .forms import CustomUserCreationForm
+
+from .forms import SignUpForm
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')  # change to your login URL
+    else:
+        form = SignUpForm()
+    return render(request, 'tweet/signup.html', {'form': form})
+
 
 
 
@@ -15,8 +30,19 @@ def index(request):
 
 
 def home(request):
-    return HttpResponse("Home Page Working")
+    return render(request, 'home.html')
 
+
+
+@login_required
+def my_posts(request):
+    # শুধু login user এর tweets
+    tweets = Tweet.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'tweet/my_posts.html', {'tweets': tweets})
+
+def my_posts(request):
+    tweets = Tweet.objects.filter(user=request.user)
+    return render(request, 'tweet/my_posts.html', {'tweets': tweets})
 
 
 
@@ -27,6 +53,18 @@ def tweet_list(request):
         'tweet_list.html',
         {'tweets': tweets}
     )
+def tweet_list(request):
+    query = request.GET.get('q')  # search text
+    tweets = Tweet.objects.all()
+
+    if query:
+        tweets = tweets.filter(text__icontains=query)
+
+    return render(request, 'tweet_list.html', {
+        'tweets': tweets
+    })
+
+
 
 @login_required
 def tweet_create(request):
@@ -106,3 +144,19 @@ def register(request):
         'registration/register.html',
         {'form': form}
     )
+
+
+def tweet_detail(request, pk):
+    tweet = Tweet.objects.get(pk=pk)
+    return render(request, 'tweet/tweet_detail.html', {
+        'tweet': tweet
+    })
+
+def tweet_detail(request, tweet_id):  # note: tweet_id
+    tweet = Tweet.objects.get(id=tweet_id)
+    return render(request, 'tweet/tweet_detail.html', {
+        'tweet': tweet
+    })
+
+
+
